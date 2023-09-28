@@ -1,22 +1,26 @@
 #include "minitalk.h"
 
-void send_char(pid_t pid, char c)
+void send_char(pid_t pid, char *str)
 {
     int digit;
 	int err;
 
-    digit = 7;
-    while(digit >= 0)
-    {
-        if(c & (1 << digit))
-            err = kill(pid,SIGUSR1);
-        else
-            err = kill(pid,SIGUSR2);
-        if(err == -1)
-			exit(1);
-		digit--;
-        usleep(100);
-    }
+	while(*str != '\0')
+	{
+		digit = 7;
+		while(digit >= 0)
+		{
+			if(*str & (1 << digit))
+				err = kill(pid,SIGUSR1);
+			else
+				err = kill(pid,SIGUSR2);
+			if(err == -1)
+				exit(1);
+			digit--;
+			usleep(100);
+		}
+		str++;
+	}
 }
 
 /*
@@ -25,14 +29,14 @@ void send_char(pid_t pid, char c)
 安定させるためにunsigned char にすべきか？けど試してみたら変な値が出てきた
 */
 
-void str_to_char(pid_t pid, char *str)
-{
-    while(*str != '\0')
-    {
-        send_char(pid, *str);
-        str++;
-    }
-}
+// void str_to_char(pid_t pid, char *str)
+// {
+//     while(*str != '\0')
+//     {
+//         send_char(pid, *str);
+//         str++;
+//     }
+// }
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +52,7 @@ int main(int argc, char *argv[])
 		ft_printf("argment pid is error. pid = %d",pid);
         return 1;
     }
-    str_to_char(pid,argv[2]);
+    send_char(pid,argv[2]);
     return 0;
 }
 //printfの後にwriteをすると、順番が逆になる
