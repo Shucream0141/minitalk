@@ -1,45 +1,21 @@
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <limits.h>
-#include <time.h>
-#include <stdio.h>
-int	ft_atoi(const char *str);
-
-// void send_char(pid_t pid,char c)
-// {
-//     int i;
-//     int bit;
-
-//     bit = 1;
-//     i = 0;
-//     while(i < 8)
-//     {
-//         bit = c % 2;
-//         c /= 2;
-//         if(bit == 1)
-//             kill(pid,SIGUSR1);//USR1
-//         else
-//             kill(pid,SIGUSR2);//USR2
-//         i++;
-//         usleep(100);
-//     }
-// }
+#include "minitalk.h"
 
 void send_char(pid_t pid, char c)
 {
     int digit;
+	int err;
 
     digit = 7;
     while(digit >= 0)
     {
         if(c & (1 << digit))
-            kill(pid,SIGUSR1);
+            err = kill(pid,SIGUSR1);
         else
-            kill(pid,SIGUSR2);
-        digit--;
+            err = kill(pid,SIGUSR2);
+        if(err == -1)
+			exit(1);
+		digit--;
         usleep(100);
-        // printf("\n送りました%lu\n\n",clock());
     }
 }
 
@@ -51,7 +27,7 @@ void send_char(pid_t pid, char c)
 
 void str_to_char(pid_t pid, char *str)
 {
-    while(*str)
+    while(*str != '\0')
     {
         send_char(pid, *str);
         str++;
@@ -61,7 +37,7 @@ void str_to_char(pid_t pid, char *str)
 int main(int argc, char *argv[])
 {
     int pid;
-    // printf("\n始めます%lu\n\n",clock());
+
     if(argc != 3)
         return 1;
     pid = ft_atoi(argv[1]);
@@ -69,31 +45,29 @@ int main(int argc, char *argv[])
         return 1;
     if(pid <= 1000 || pid >= 99999)
     {
-        write(1,"argment pid is error",20);
+		ft_printf("argment pid is error. pid = %d",pid);
         return 1;
     }
     str_to_char(pid,argv[2]);
     return 0;
 }
+//printfの後にwriteをすると、順番が逆になる
 
 
 //文字のbitを送る順番は、向こうの復号の順番を考えるかこちらのやつを考えるのにたく、
 //手っ取り早くビット演算使うか、自分でアルゴリズム考えるかのどちらか
-static int	over(long *num, const char *str, int count)
+static int	is_over(long num)
 {
-	if (count == 0 && ((*num > LONG_MAX / 10) || (*num == LONG_MAX / 10 && *str
-				- '0' > LONG_MAX % 10)))
-	{
-		*num = LONG_MAX;
+	if (num > INT_MAX || num < INT_MIN)
 		return (1);
-	}
-	else if (count == 1 && ((*num > LONG_MIN / 10 * -1) || (*num == LONG_MIN
-				/ 10 * -1 && *str - '0' > LONG_MIN % 10 * -1)))
-	{
-		*num = LONG_MIN;
-		return (1);
-	}
-	return (0);
+	else
+		return (0);
+}
+
+void exit_and_print(void)
+{
+	ft_printf("error\n");
+	exit(1);
 }
 
 int	ft_atoi(const char *str)
@@ -113,16 +87,15 @@ int	ft_atoi(const char *str)
 	}
 	while (*str >= '0' && *str <= '9')
 	{
-		if (over(&num, str, count))
-			return (num);
+		if (is_over(num))
+			exit_and_print();
 		num = num * 10 + *str - '0';
 		str++;
 	}
-    if((*str < '0' || *str > '9') && *str != '\0')
-        return 0;   
+    if(*str != '\0' || count > 1)
+		exit_and_print();
 	if (count == 1)
 		num *= -1;
-	else if (count > 1)
-		num = 0;
 	return (num);
 }
+

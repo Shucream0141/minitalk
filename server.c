@@ -1,9 +1,5 @@
-#include <signal.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <stdio.h>
+#include "minitalk.h"
+
 volatile sig_atomic_t bits = 0;
 
 //移植性が必要なときはsignalよりもsigactionを使えman siganlより
@@ -15,17 +11,17 @@ void signal_handler(int signal, siginfo_t *info, void *context)
     static int i;
     char c;
 
+    (void)info;
+    (void)context;    
     bits = bits << 1;
     if(signal == SIGUSR1)
         bits |= 1;    
     i++;
-    // printf("\n受け取った%lu、%d回目\n\n",clock(),i);
     if(i == 8)
     {
         c = bits;
         write(1,&c,1);
         i = 0;
-        // printf("\n復号完了%lu\n\n",clock());
     }
 }
 
@@ -34,8 +30,8 @@ void    receiver()
     struct sigaction    act1;
     struct sigaction    act2;
 
-    memset(&act1,0,sizeof(act1));
-    memset(&act2,0,sizeof(act2));
+    ft_memset(&act1,0,sizeof(act1));
+    ft_memset(&act2,0,sizeof(act2));
     act1.sa_sigaction = signal_handler;
     act2.sa_sigaction = signal_handler;
     sigemptyset(&act1.sa_mask);
@@ -52,7 +48,7 @@ void    receiver()
 
 int main()
 {
-    printf("pid =%d\n",getpid());
+    ft_printf("pid = %d\nsend pid num from client\n",getpid());
     receiver();
     while(1)
         pause();
