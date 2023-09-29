@@ -1,21 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_put_nbr.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sendo <sendo@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/07/08 12:25:40 by sendo             #+#    #+#             */
+/*   Updated: 2023/07/31 12:06:35 by sendo            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_printf.h"
 
-size_t ft_put_nbr(int n)
+int	ft_put_nbr(int n)
 {
-    size_t count;
+	int	count;
 
-    count = 1;
-	if(n < 0)
+	count = 1;
+	ft_putnbr_fd(n, 1);
+	if (n < 0)
 		count++;
-    ft_putnbr_fd(n,1);
-    while(n/10)
-    {
-        n = n/10;
-        count++;
-    }
-    return count;
+	while (n / 10)
+	{
+		n = n / 10;
+		count++;
+	}
+	return (count);
 }
-
 
 void	ft_putnbr_fd(int n, int fd)
 {
@@ -43,3 +54,8 @@ void	ft_putnbr_fd(int n, int fd)
 		ft_putnbr_fd(n % 10, fd);
 	}
 }
+
+// int main()
+// {
+// 	ft_put_nbr(-2147483648);
+// }
